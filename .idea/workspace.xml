@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="c9472ac2-c3f6-40a7-9afc-9f4f81bad00a" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/Library/Port.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Library/error.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Library/kamakiri.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Library/mtk_preloader.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Library/pltools.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Library/usblib.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Library/utils.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config/brom_config.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config/usb_ids.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/mtk.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/payloads/generic_dump_payload.bin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/payloads/generic_patcher_payload.bin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/payloads/generic_reboot_payload.bin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/payloads/generic_stage1_payload.bin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/payloads/generic_uart_dump_payload.bin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/payloads/mt6261_payload.bin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/payloads/mt6572_payload.bin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/payloads/mt6580_payload.bin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/payloads/mt6582_payload.bin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/payloads/mt6735_payload.bin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/payloads/mt6737_payload.bin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/payloads/mt6739_payload.bin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/payloads/mt6753_payload.bin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/payloads/mt6755_payload.bin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/payloads/mt6757_payload.bin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/payloads/mt6761_payload.bin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/payloads/mt6763_payload.bin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/payloads/mt6765_payload.bin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/payloads/mt6768_payload.bin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/payloads/mt6771_payload.bin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/payloads/mt6779_payload.bin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/payloads/mt6785_payload.bin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/payloads/mt6797_payload.bin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/payloads/mt6799_payload.bin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/payloads/mt6873_payload.bin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/payloads/mt8127_payload.bin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/payloads/mt8163_payload.bin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/payloads/mt8173_payload.bin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/payloads/mt8695_payload.bin" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectId" id="1qZYUhlSsAcoVAXZ6eoYcqh6KrS" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.path.for.package.eslint" value="project" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="restartRequiresConfirmation" value="false" />
+  </component>
+  <component name="RunManager">
+    <configuration name="mtk" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="mtkclient" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/mtk.py" />
+      <option name="PARAMETERS" value="dumpbrom" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.mtk" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="c9472ac2-c3f6-40a7-9afc-9f4f81bad00a" name="Default Changelist" comment="" />
+      <created>1617288602702</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1617288602702</updated>
+      <workItem from="1617288603943" duration="973000" />
+      <workItem from="1617293269328" duration="614000" />
+      <workItem from="1617296865264" duration="1398000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/mtkclient$mtk.coverage" NAME="mtk Coverage Results" MODIFIED="1617297765516" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+  </component>
+</project>
