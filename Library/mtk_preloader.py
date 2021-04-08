@@ -190,6 +190,8 @@ class Preloader(metaclass=LogBase):
             self.setreg_disablewatchdogtimer(self.config.hwcode)  # D4
         if self.display:
             self.info("HW code:\t\t\t" + hex(self.config.hwcode))
+        with open(os.path.join("logs","hwcode.txt"),"wb") as wf:
+            wf.write(hexlify(self.config.hwcode))
         meid = self.get_meid()
         with open(os.path.join("logs","meid.txt"),"wb") as wf:
             wf.write(hexlify(meid))
