@@ -276,6 +276,7 @@ class usb_class(metaclass=LogBase):
             except:
                 pass
             del self.device
+            self.connected = False
 
     def write(self, command, pktsize=64):
         if isinstance(command, str):
@@ -341,6 +342,54 @@ class usb_class(metaclass=LogBase):
         ret = self.device.ctrl_transfer(bmRequestType=bmRequestType, bRequest=bRequest, wValue=wValue, wIndex=wIndex,
                                         data_or_wLength=data_or_wLength)
         return ret[0] | (ret[1] << 8)
+
+    def detectusbdevices(self):
+        dev = usb.core.find(find_all=True)
+        ids = [self.deviceclass(cfg.idVendor, cfg.idProduct) for cfg in dev]
+        return ids
+
+    def usbwrite(self, data):
+        size = self.write(data, len(data))
+        # port->flush()
+        return size
+
+    def usbreadwrite(self, data, resplen):
+        size = self.usbwrite(data)
+        # port->flush()
+        res = self.usbread(resplen)
+        return res
+
+    def rdword(self,count=1,little=False):
+        rev="<" if little else ">"
+        data=unpack(rev+"I"*count,self.usbread(4*count))
+        if count==1:
+            return data[0]
+        return data
+
+    def rword(self,count=1, little=False):
+        rev = "<" if little else ">"
+        data=[unpack(rev+"H",self.usbread(2))[0] for i in range(count)]
+        if count==1:
+            return data[0]
+        return data
+
+    def rbyte(self,count=1):
+        return self.usbread(count)
+
+    def usbread(self, resplen,usbsize=64):
+        size=min(resplen,usbsize)
+        res = b""
+        timeout = 0
+        while resplen > 0:
+            tmp = self.read(size)
+            if tmp == b"":
+                if timeout == 4:
+                    break
+                timeout += 1
+                time.sleep(0.1)
+            resplen -= len(tmp)
+            res += tmp
+        return res
 
 
 class scsi_cmds(Enum):

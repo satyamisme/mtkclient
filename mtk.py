@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# !/usr/bin/env python3
 # MTK Flash Client (c) B.Kerler 2020-2021.
 # Licensed under MIT License
 """
@@ -8,6 +7,8 @@ Usage:
     mtk.py dumpbrom [--filename=filename] [--ptype=ptype] [--crash] [--skipwdt] [--wdt=wdt] [--var1=var1] [--da_addr=addr] [--brom_addr=addr] [--uartaddr=addr] [--debugmode] [--vid=vid] [--pid=pid] [--interface=interface]
     mtk.py crash [--mode=mode] [--debugmode] [--skipwdt] [--vid=vid] [--pid=pid]
     mtk.py gettargetconfig [--debugmode] [--vid=vid] [--pid=pid]
+    mtk.py stage [--stage2=filename] [--stage2addr=addr] [--stage1=filename] [--verifystage2] [--crash]
+    mtk.py plstage [--filename=filename]
 
 Description:
     dumpbrom [--wdt=wdt] [--var1=var1] [--payload_addr=addr]                                 # Try to dump the bootrom
@@ -41,7 +42,7 @@ Options:
 """
 
 from docopt import docopt
-
+import time
 from config.usb_ids import default_ids
 from Library.pltools import PLTools
 from Library.mtk_preloader import Preloader
@@ -49,7 +50,7 @@ from Library.Port import Port
 from Library.utils import *
 from config.brom_config import Mtk_Config
 
-args = docopt(__doc__, version='EDL 2.1')
+args = docopt(__doc__, version='MTK 1.2')
 
 logger = logging.getLogger(__name__)
 
@@ -158,6 +159,8 @@ class Main(metaclass=LogBase):
             pid = getint(args["--pid"])
         else:
             pid = -1
+        if not os.path.exists("logs"):
+            os.mkdir("logs")
         enforcecrash = False
         if args["--crash"]:
             enforcecrash = True
@@ -186,7 +189,7 @@ class Main(metaclass=LogBase):
                     cpu = ""
                     if mtk.config.cpu != "":
                         cpu = "_" + mtk.config.cpu
-                    filename = "brom" + cpu + "_" + hex(mtk.config.hwcode)[2:] + ".bin"
+                    filename = os.path.join("logs","brom" + cpu + "_" + hex(mtk.config.hwcode)[2:] + ".bin")
                 plt = PLTools(mtk, self.__logger.level)
                 plt.run_dump_brom(filename, args["--ptype"])
             mtk.port.close()
@@ -202,6 +205,113 @@ class Main(metaclass=LogBase):
                 mtk.preloader.get_target_config()
             mtk.port.close()
             self.close()
+        elif args["plstage"]:
+            if args["--filename"] is None:
+                filename = os.path.join("payloads","pl.bin")
+            else:
+                filename = args["--filename"]
+            if os.path.exists(filename):
+                with open(filename, "rb") as rf:
+                    rf.seek(0)
+                    dadata = rf.read()
+            if mtk.preloader.init(args):
+                if mtk.config.chipconfig.pl_payload_addr is not None:
+                    daaddr = mtk.config.chipconfig.pl_payload_addr
+                else:
+                    daaddr = 0x40200000  # 0x40001000
+                if mtk.preloader.send_da(daaddr, len(dadata), 0x100, dadata):
+                    self.info(f"Sent da to {hex(daaddr)}, length {hex(len(dadata))}")
+                    if mtk.preloader.jump_da(daaddr):
+                        self.info(f"Jumped to {hex(daaddr)}.")
+                        ack = unpack(">I", mtk.port.usbread(4))[0]
+                        if ack == 0xB1B2B3B4:
+                            self.info("Successfully loaded stage2")
+        elif args["stage"]:
+            if args["--filename"] is None:
+                stage1file = "payloads/generic_stage1_payload.bin"
+            else:
+                stage1file = args["--filename"]
+            if not os.path.exists(stage1file):
+                self.error(f"Error: {stage1file} doesn't exist !")
+                return False
+            if args["--stage2addr"] is None:
+                stage2addr = 0x201000
+            else:
+                stage2addr = getint(args["--stage2addr"])
+            if args["--stage2"] is None:
+                stage2file = "payloads/stage2.bin"
+            else:
+                stage2file = args["--stage2"]
+                if not os.path.exists(stage2file):
+                    self.error(f"Error: {stage2file} doesn't exist !")
+                    return False
+            verifystage2 = args["--verifystage2"]
+            if mtk.preloader.init(args):
+                if args["--crash"] is not None:
+                    mtk = self.crasher(mtk=mtk, enforcecrash=enforcecrash)
+                if mtk.port.cdc.pid == 0x0003:
+                    plt = PLTools(mtk, self.__logger.level)
+                    with open(stage2file, "rb") as rr:
+                        stage2data = rr.read()
+                        while len(stage2data) % 0x200:
+                            stage2data += b"\x00"
+                    self.info("Uploading stage 1")
+                    if plt.runpayload(filename=stage1file, ptype="kamakiri"):
+                        self.info("Sucessfully uploaded stage 1, sending stage 2")
+                        # ###### Send stage2
+                        # magic
+                        mtk.port.usbwrite(pack(">I", 0xf00dd00d))
+                        # cmd write
+                        mtk.port.usbwrite(pack(">I", 0x4000))
+                        # address
+                        mtk.port.usbwrite(pack(">I", stage2addr))
+                        # length
+                        mtk.port.usbwrite(pack(">I", len(stage2data)))
+                        bytestowrite = len(stage2data)
+                        pos = 0
+                        while bytestowrite > 0:
+                            size = min(bytestowrite, 64)
+                            if mtk.port.usbwrite(stage2data[pos:pos + size]):
+                                bytestowrite -= size
+                                pos += size
+                        time.sleep(0.1)
+                        flag = mtk.port.rdword()
+                        if flag != 0xD0D0D0D0:
+                            self.error(f"Error on sending stage2, size {hex(len(stage2data))}.")
+                        self.info(f"Done sending stage2, size {hex(len(stage2data))}.")
+
+                        if verifystage2:
+                            self.info("Verifying stage2 data")
+                            rdata = b""
+                            mtk.port.usbwrite(pack(">I", 0xf00dd00d))
+                            mtk.port.usbwrite(pack(">I", 0x4002))
+                            mtk.port.usbwrite(pack(">I", stage2addr))
+                            mtk.port.usbwrite(pack(">I", len(stage2data)))
+                            bytestoread = len(stage2data)
+                            while bytestoread > 0:
+                                size = min(bytestoread, 64)
+                                rdata += mtk.port.usbread(size)
+                                bytestoread -= size
+                            flag = mtk.port.rdword()
+                            if flag != 0xD0D0D0D0:
+                                self.error("Error on reading stage2 data")
+                            if rdata != stage2data:
+                                self.error("Stage2 data doesn't match")
+                                with open("rdata", "wb") as wf:
+                                    wf.write(rdata)
+                            else:
+                                self.info("Stage2 verification passed.")
+                        # ######### Jump stage1
+                        # magic
+                        mtk.port.usbwrite(pack(">I", 0xf00dd00d))
+                        # cmd jump
+                        mtk.port.usbwrite(pack(">I", 0x4001))
+                        # address
+                        mtk.port.usbwrite(pack(">I", stage2addr))
+                        self.info("Done jumping stage2")
+                        ack = unpack(">I", mtk.port.usbread(4))[0]
+                        if ack == 0xB1B2B3B4:
+                            self.info("Successfully loaded stage2")
 
 
 if __name__ == '__main__':

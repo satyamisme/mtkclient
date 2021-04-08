@@ -184,7 +184,6 @@ class Preloader(metaclass=LogBase):
             self.info("\tHW Ver:\t\t\t" + hex(self.config.hwver))
             self.info("\tSW Ver:\t\t\t" + hex(self.config.swver))
         self.config.target_config = self.get_target_config(self.display)
-
         if not args["--skipwdt"]:
             if self.display:
                 self.info("Disabling Watchdog...")
@@ -192,9 +191,17 @@ class Preloader(metaclass=LogBase):
         if self.display:
             self.info("HW code:\t\t\t" + hex(self.config.hwcode))
         meid = self.get_meid()
+        with open(os.path.join("logs","meid.txt"),"wb") as wf:
+            wf.write(hexlify(meid))
         if self.display:
             if meid != b"":
                 self.info("MEID:\t\t\t\t" + hexlify(meid).decode('utf-8').upper())
+        socid = self.get_socid()
+        with open(os.path.join("logs","socid.txt"), "wb") as wf:
+            wf.write(hexlify(socid))
+        if self.display:
+            if meid != b"":
+                self.info("SOCID:\t\t\t\t" + hexlify(socid).decode('utf-8').upper())
         return True
 
     def read32(self, addr, dwords=1) -> list:
@@ -436,6 +443,22 @@ class Preloader(metaclass=LogBase):
                     else:
                         self.error("Error on get_meid: " + self.eh.status(status))
         return b""
+
+    def get_socid(self):
+        if self.usbwrite(self.Cmd.GET_BL_VER.value):
+            res = self.usbread(1)
+            if res == self.Cmd.GET_BL_VER.value:
+                self.usbwrite(self.Cmd.GET_SOC_ID.value)  # 0xE7
+                if self.usbread(1) == self.Cmd.GET_SOC_ID.value:
+                    length = unpack(">I", self.usbread(4))[0]
+                    self.mtk.config.socid = self.usbread(length)
+                    status = unpack("<H", self.usbread(2))[0]
+                    if status == 0:
+                        return self.mtk.config.socid
+                    else:
+                        self.error("Error on get_socid: " + self.eh.status(status))
+        return b""
+
 
     def prepare_data(self, data, sigdata=None, maxsize=0):
         gen_chksum = 0
