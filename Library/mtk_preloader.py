@@ -191,7 +191,7 @@ class Preloader(metaclass=LogBase):
         if self.display:
             self.info("HW code:\t\t\t" + hex(self.config.hwcode))
         with open(os.path.join("logs","hwcode.txt"),"wb") as wf:
-            wf.write(hexlify(self.config.hwcode))
+            wf.write(bytes(hex(self.config.hwcode),'utf-8'))
         meid = self.get_meid()
         with open(os.path.join("logs","meid.txt"),"wb") as wf:
             wf.write(hexlify(meid))
