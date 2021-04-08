@@ -147,6 +147,11 @@ class Stage2(metaclass=LogBase):
             pos+=len(data)
         self.info(f"Successfully wrote data to {hex(start)}.")
 
+    def reboot(self):
+        self.cdc.usbwrite(pack(">I", 0xf00dd00d))
+        self.cdc.usbwrite(pack(">I", 0x3000))
+        self.info("Sent reboot command")
+
     def rpmb(self, start, length, filename):
         if start == 0:
             start=0
@@ -214,6 +219,8 @@ def main():
                         help='Dump memory')
     parser.add_argument('--memwrite', dest='memwrite', action="store_true",
                         help='Write to memory')
+    parser.add_argument('--reboot', dest='reboot', action="store_true",
+                        help='Reboot device')
     parser.add_argument('--length', dest='length', type=str,
                         help='Max length to dump')
     parser.add_argument('--start', dest='start', type=str,
@@ -236,6 +243,8 @@ def main():
             st2.memread(start,length)
         elif args.memwrite:
             st2.memwrite(start,args.data)
+        elif args.reboot:
+            st2.reboot()
     st2.close()
 
 if __name__=="__main__":
