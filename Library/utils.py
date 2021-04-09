@@ -10,16 +10,6 @@ import colorama
 import copy
 from struct import pack, unpack
 
-try:
-    from capstone import *
-except ImportError as e:
-    print(f"Capstone library missing: {str(e)}")
-
-try:
-    from keystone import *
-except ImportError as e:
-    print(f"Keystone library missing: {str(e)}")
-
 
 def hex2bytes(value):
     return bytes.fromhex(value)

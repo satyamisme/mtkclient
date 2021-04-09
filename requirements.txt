@@ -1,5 +1,6 @@
 wheel
 docopt>=0.6.2
+pyusb
 usb>=0.0.83.dev0
 colorama>=0.4.3
 capstone>=4.0.2
