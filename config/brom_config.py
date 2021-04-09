@@ -341,6 +341,7 @@ hwconfig = {
                       uart=0x11002000,
                       brom_payload_addr=0x100A00,
                       da_payload_addr=0x200000,
+                      pl_payload_addr=0x40200000,
                       gcpu_base=0x10216000,  # mt6735, 6737, 6753, 6735m
                       sej_base=0x10008000,
                       # no dxcc
@@ -355,6 +356,7 @@ hwconfig = {
                       uart=0x11002000,
                       brom_payload_addr=0x100A00,
                       da_payload_addr=0x200000,
+                      pl_payload_addr=0x40200000,
                       gcpu_base=0x10216000,  # mt6735, 6737, 6753, 6735m
                       sej_base=0x10008000,
                       # no dxcc
@@ -370,6 +372,7 @@ hwconfig = {
                       uart=0x11002000,
                       brom_payload_addr=0x100A00,
                       da_payload_addr=0x200000,
+                      pl_payload_addr=0x40200000,
                       gcpu_base=0x10050000,
                       sej_base=0x1000A000,  # hacc
                       dxcc_base=0x10210000,
@@ -407,7 +410,7 @@ hwconfig = {
         ap_dma_mem=0x11000000 + 0x1A0,  # AP_DMA_I2C_0_RX_MEM_ADDR
         blacklist=[(0x00102760, 0x0), (0x00105704, 0x0)],
         damode=damodes.DEFAULT,  #
-        dacode=0x6735,
+        dacode=0x6753,
         name="MT6753"),
     0x571: chipconfig(  # var1
         watchdog=0x10007000,
@@ -635,7 +638,8 @@ hwconfig = {
         dacode=0x6785,
         name="MT6785",
         description="Helio G90"),
-    0x6795: chipconfig(  # var1=0xA, #todo
+    0x6795: chipconfig(
+        var1=0xA, #confirmed
         watchdog=0x10007000,
         uart=0x11002000,
         brom_payload_addr=0x100A00,
@@ -733,7 +737,8 @@ hwconfig = {
         damode=damodes.XFLASH,
         dacode=0x6877,  # todo
         name="MT6877"),
-    0x816: chipconfig(  # var1
+    0x816: chipconfig(
+        var1=0xA, # confirmed
         watchdog=0x10007000,
         uart=0x11002000,
         brom_payload_addr=0x100A00,
@@ -743,7 +748,7 @@ hwconfig = {
         sej_base=0x1000a000,  # hacc
         cqdma_base=0x10212000,
         ap_dma_mem=0x11000a80 + 0x1a0,  # todo check
-        # blacklist
+        blacklist=[(0x102848, 0x0)],
         damode=damodes.XFLASH,
         dacode=0x6885,
         name="MT6885"),
