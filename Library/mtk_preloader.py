@@ -91,7 +91,7 @@ class Preloader(metaclass=LogBase):
         GET_BL_VER = b"\xFE"
         GET_VERSION = b"\xFF"
 
-    def __init__(self, mtk, nosocid=False, loglevel=logging.INFO):
+    def __init__(self, mtk, loglevel=logging.INFO):
         self.mtk = mtk
         self.__logger = self.__logger
         self.eh = ErrorHandler()
@@ -108,7 +108,6 @@ class Preloader(metaclass=LogBase):
         self.usbwrite = self.mtk.port.usbwrite
         self.echo = self.mtk.port.echo
         self.sendcmd = self.mtk.port.mtk_cmd
-        self.nosocid=nosocid
 
         if loglevel == logging.DEBUG:
             logfilename = "log.txt"
@@ -120,7 +119,7 @@ class Preloader(metaclass=LogBase):
         else:
             self.__logger.setLevel(logging.INFO)
 
-    def init(self, args, maxtries=None):
+    def init(self, args, readsocid=False, maxtries=None):
         self.info("Status: Waiting for PreLoader VCOM, please connect mobile")
         if not self.mtk.port.handshake(maxtries=maxtries):
             self.error("No MTK PreLoader detected.")
@@ -185,27 +184,22 @@ class Preloader(metaclass=LogBase):
             self.info("\tHW Ver:\t\t\t" + hex(self.config.hwver))
             self.info("\tSW Ver:\t\t\t" + hex(self.config.swver))
         self.config.target_config = self.get_target_config(self.display)
+
         if not args["--skipwdt"]:
             if self.display:
                 self.info("Disabling Watchdog...")
             self.setreg_disablewatchdogtimer(self.config.hwcode)  # D4
         if self.display:
             self.info("HW code:\t\t\t" + hex(self.config.hwcode))
-        with open(os.path.join("logs","hwcode.txt"),"wb") as wf:
-            wf.write(bytes(hex(self.config.hwcode),'utf-8'))
         meid = self.get_meid()
-        with open(os.path.join("logs","meid.txt"),"wb") as wf:
-            wf.write(hexlify(meid))
         if self.display:
             if meid != b"":
-                self.info("MEID:\t\t\t\t" + hexlify(meid).decode('utf-8').upper())
-        if not self.nosocid:
+                self.info("ME_ID:\t\t\t" + hexlify(meid).decode('utf-8').upper())
+        if readsocid:
             socid = self.get_socid()
-            with open(os.path.join("logs","socid.txt"), "wb") as wf:
-                wf.write(hexlify(socid))
             if self.display:
-                if meid != b"":
-                    self.info("SOCID:\t\t\t\t" + hexlify(socid).decode('utf-8').upper())
+                if socid != b"":
+                    self.info("SOC_ID:\t\t\t" + hexlify(socid).decode('utf-8').upper())
         return True
 
     def read32(self, addr, dwords=1) -> list:
@@ -462,7 +456,6 @@ class Preloader(metaclass=LogBase):
                     else:
                         self.error("Error on get_socid: " + self.eh.status(status))
         return b""
-
 
     def prepare_data(self, data, sigdata=None, maxsize=0):
         gen_chksum = 0
