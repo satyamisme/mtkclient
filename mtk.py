@@ -4,16 +4,16 @@
 """
 Usage:
     mtk.py -h | --help
-    mtk.py dumpbrom [--filename=filename] [--ptype=ptype] [--crash] [--skipwdt] [--wdt=wdt] [--var1=var1] [--da_addr=addr] [--brom_addr=addr] [--uartaddr=addr] [--debugmode] [--vid=vid] [--pid=pid] [--interface=interface]
-    mtk.py crash [--mode=mode] [--debugmode] [--skipwdt] [--vid=vid] [--pid=pid]
-    mtk.py gettargetconfig [--debugmode] [--vid=vid] [--pid=pid]
-    mtk.py stage [--stage2=filename] [--stage2addr=addr] [--stage1=filename] [--verifystage2] [--crash]
-    mtk.py plstage [--filename=filename]
+    mtk.py dumpbrom [--nosocid] [--filename=filename] [--ptype=ptype] [--crash] [--skipwdt] [--wdt=wdt] [--var1=var1] [--da_addr=addr] [--brom_addr=addr] [--uartaddr=addr] [--debugmode] [--vid=vid] [--pid=pid] [--interface=interface]
+    mtk.py crash [--nosocid] [--mode=mode] [--debugmode] [--skipwdt] [--vid=vid] [--pid=pid]
+    mtk.py gettargetconfig [--nosocid] [--debugmode] [--vid=vid] [--pid=pid]
+    mtk.py stage [--nosocid] [--stage2=filename] [--stage2addr=addr] [--stage1=filename] [--verifystage2] [--crash]
+    mtk.py plstage [--nosocid] [--filename=filename]
 
 Description:
-    dumpbrom [--wdt=wdt] [--var1=var1] [--payload_addr=addr]                                 # Try to dump the bootrom
-    crash [--mode] [--debugmode] [--vid=vid] [--pid=pid]                                     # Try to crash the preloader
-    gettargetconfig [--debugmode]                                                            # Get target config (sbc, daa, etc.)
+    dumpbrom [--nosocid] [--wdt=wdt] [--var1=var1] [--payload_addr=addr]                                 # Try to dump the bootrom
+    crash [--nosocid] [--mode] [--debugmode] [--vid=vid] [--pid=pid]                                     # Try to crash the preloader
+    gettargetconfig [--nosocid] [--debugmode]                                                            # Get target config (sbc, daa, etc.)
 
 Options:
     --loader=filename                  Use specific DA loader, disable autodetection
@@ -39,6 +39,7 @@ Options:
     --parttype=parttype                Partition type (user,boot1,boot2,gp1,gp2,gp3,gp4,rpmb)
     --filename=filename                Optional filename
     --crash                            Enforce crash if device is in pl mode to enter brom mode
+    --nosocid                          Disable socid read
 """
 
 from docopt import docopt
@@ -63,7 +64,7 @@ def split_by_n(seq, unit_count):
 
 
 class Mtk(metaclass=LogBase):
-    def __init__(self, args, loader, loglevel=logging.INFO, vid=-1, pid=-1, interface=0):
+    def __init__(self, args, loader, nosocid=False, loglevel=logging.INFO, vid=-1, pid=-1, interface=0):
         self.__logger = self.__logger
         self.config = Mtk_Config(self, loglevel)
         self.args = args
@@ -109,7 +110,7 @@ class Mtk(metaclass=LogBase):
         else:
             portconfig = default_ids
         self.port = Port(self, portconfig, self.__logger.level)
-        self.preloader = Preloader(self, self.__logger.level)
+        self.preloader = Preloader(self, nosocid, self.__logger.level)
 
 class Main(metaclass=LogBase):
     def __init__(self):
@@ -121,7 +122,7 @@ class Main(metaclass=LogBase):
     def close(self):
         sys.exit(0)
 
-    def crasher(self, mtk, enforcecrash, display=True, mode=None):
+    def crasher(self, mtk, enforcecrash, display=True, mode=None, nosocid=False):
         plt = PLTools(mtk, self.__logger.level)
         if enforcecrash or not (mtk.port.cdc.vid == 0xE8D and mtk.port.cdc.pid == 0x0003):
             self.info("We're not in bootrom, trying to crash da...")
@@ -132,7 +133,7 @@ class Main(metaclass=LogBase):
                     except Exception as e:
                         self.__logger.debug(str(e))
                         pass
-                    mtk = Mtk(loader=None, loglevel=self.__logger.level, vid=0xE8D, pid=0x0003, interface=1,
+                    mtk = Mtk(loader=None, nosocid=nosocid, loglevel=self.__logger.level, vid=0xE8D, pid=0x0003, interface=1,
                               args=args)
                     mtk.preloader.display = display
                     if mtk.preloader.init(args, maxtries=20):
@@ -143,7 +144,7 @@ class Main(metaclass=LogBase):
                 except Exception as e:
                     self.__logger.debug(str(e))
                     pass
-                mtk = Mtk(loader=None, loglevel=self.__logger.level, vid=0xE8D, pid=0x0003, interface=1,
+                mtk = Mtk(loader=None, nosocid=nosocid, loglevel=self.__logger.level, vid=0xE8D, pid=0x0003, interface=1,
                           args=args)
                 mtk.preloader.display = display
                 if mtk.preloader.init(args=args, maxtries=20):
@@ -161,6 +162,10 @@ class Main(metaclass=LogBase):
             pid = -1
         if not os.path.exists("logs"):
             os.mkdir("logs")
+        if args["--nosocid"] is not None:
+            nosocid = args["--nosocid"]
+        else:
+            nosocid = False
         enforcecrash = False
         if args["--crash"]:
             enforcecrash = True
@@ -174,12 +179,12 @@ class Main(metaclass=LogBase):
         else:
             self.__logger.setLevel(logging.INFO)
         interface = -1
-        mtk = Mtk(loader=None, loglevel=self.__logger.level, vid=vid, pid=pid, interface=interface,
+        mtk = Mtk(loader=None, nosocid=nosocid, loglevel=self.__logger.level, vid=vid, pid=pid, interface=interface,
                   args=args)
 
         if args["dumpbrom"]:
             if mtk.preloader.init(args):
-                mtk = self.crasher(mtk=mtk, enforcecrash=enforcecrash)
+                mtk = self.crasher(mtk=mtk, enforcecrash=enforcecrash, nosocid=nosocid)
                 if mtk is None:
                     sys.exit(0)
                 if mtk.port.cdc.vid != 0xE8D and mtk.port.cdc.pid != 0x0003:
