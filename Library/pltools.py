@@ -1,8 +1,15 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# (c) B.Kerler 2018-2021 MIT License
 import os
 import logging
 from binascii import hexlify
 from struct import pack, unpack
+from Library.cqdma import cqdma
 from Library.utils import LogBase, print_progress
+from Library.hwcrypto_sej import sej
+from Library.hwcrypto_gcpu import GCpu
+from Library.hwcrypto_dxcc import dxcc
 from Library.kamakiri import Kamakiri
 from Library.Port import Port
 
@@ -24,10 +31,16 @@ class PLTools(metaclass=LogBase):
         self.hwcode = mtk.config.hwcode
 
         # exploit types
+        self.cqdma = cqdma(mtk, loglevel)
         self.kama = Kamakiri(self.mtk, self.__logger.level)
 
+        # crypto types
+        self.gcpu = GCpu(mtk, loglevel)
+        self.sej = sej(mtk, loglevel)
+        self.dxcc = dxcc(mtk, loglevel)
+
         if loglevel == logging.DEBUG:
-            logfilename = "log.txt"
+            logfilename = os.path.join("logs", "log.txt")
             if os.path.exists(logfilename):
                 os.remove(logfilename)
             fh = logging.FileHandler(logfilename)
@@ -43,21 +56,52 @@ class PLTools(metaclass=LogBase):
                 payload = rf.read()
                 self.info(f"Loading payload from {filename}, {hex(len(payload))} bytes")
         except FileNotFoundError:
-            self.info(f"Couldn't open {filename} for reading.")
+            self.info("Couldn't open {filename} for reading.")
             return False
 
         if addr is None:
-            if ptype == "kamakiri":
+            if ptype == "amonet":
+                addr = self.chipconfig.da_payload_addr
+            elif ptype == "kamakiri":
                 addr = self.chipconfig.brom_payload_addr
+            elif ptype == "hashimoto":
+                addr = self.chipconfig.da_payload_addr
             elif ptype == "":
                 if self.mtk.config.target_config["sla"] or self.mtk.config.target_config["daa"]:
                     addr = self.chipconfig.brom_payload_addr
                 else:
                     addr = self.chipconfig.da_payload_addr
 
-        if ptype == "kamakiri":
+        if ptype == "amonet":
+            self.info("Amonet Run")
+            if self.payload(payload, addr, ptype):
+                if dontack:
+                    return True
+                result = self.usbread(4)
+                if result == pack(">I", ack):
+                    self.info("Successfully sent payload: " + filename)
+                    return True
+                self.info("Error, payload answered instead: " + hexlify(result).decode('utf-8'))
+                return False
+            else:
+                self.error("Error on sending payload: " + filename)
+            return True
+        elif ptype == "kamakiri":
             self.info("Kamakiri / DA Run")
             if self.kama.payload(payload, addr, True):
+                if dontack:
+                    return True
+                result = self.usbread(4)
+                if result == pack(">I", ack):
+                    self.info("Successfully sent payload: " + filename)
+                    return True
+                self.info("Error, payload answered instead: " + hexlify(result).decode('utf-8'))
+                return False
+            else:
+                self.error("Error on sending payload: " + filename)
+        elif ptype == "hashimoto":
+            self.info("Hashimoto Run")
+            if self.payload(payload, addr, "cqdma"):
                 if dontack:
                     return True
                 result = self.usbread(4)
@@ -114,18 +158,33 @@ class PLTools(metaclass=LogBase):
         return mtk
 
     def run_dump_brom(self, filename, btype):
-        if btype == "kamakiri" or btype is None:
+        pfilename = os.path.join("payloads", "generic_dump_payload.bin")
+        if btype == "amonet":
+            if self.dump_brom(filename, "gcpu"):
+                self.info("Bootrom dumped as: " + filename)
+                return True
+            else:
+                self.error("Error on sending payload: " + pfilename)
+        elif btype == "hashimoto":
+            if self.dump_brom(filename, "cqdma"):
+                self.info("Bootrom dumped as: " + filename)
+                return True
+            else:
+                self.error("Error on sending payload: " + pfilename)
+        elif btype == "kamakiri" or btype is None:
             self.info("Kamakiri / DA Run")
-            pfilename = os.path.join("payloads", "generic_dump_payload.bin")
             if self.runpayload(filename=pfilename, ptype="kamakiri", ack=0xC1C2C3C4, offset=0):
                 if self.kama.dump_brom(filename):
                     self.info("Bootrom dumped as: " + filename)
                     return True
             else:
-                self.error("Error on sending payload: " + pfilename)
+                self.error("Error on sending payload: " + filename)
+        elif btype == "test":
+            data=self.aes_hwcrypt(data=b"",encrypt=False,mode="fde",btype="dxcc")
+            print(hexlify(data).decode('utf-8'))
         else:
             self.error("Unknown dumpbrom ptype: " + btype)
-            self.info("Available ptypes are: kamakiri")
+            self.info("Available ptypes are: amonet, kamakiri, hashimoto")
         self.error("Error on dumping Bootrom.")
         return False
 
@@ -139,7 +198,32 @@ class PLTools(metaclass=LogBase):
             return encrypted
         return False
 
+    def disable_range_blacklist(self, btype):
+        if btype == "gcpu":
+            self.info("GCPU Init Crypto Engine")
+            self.gcpu.init()
+            self.gcpu.acquire()
+            self.gcpu.init()
+            self.gcpu.acquire()
+            self.info("Disable Caches")
+            self.mtk.preloader.run_ext_cmd(0xB1)
+            self.info("GCPU Disable Range Blacklist")
+            self.gcpu.disable_range_blacklist()
+        elif btype == "cqdma":
+            self.info("Disable Caches")
+            self.mtk.preloader.run_ext_cmd(0xB1)
+            self.info("CQDMA Disable Range Blacklist")
+            self.cqdma.disable_range_blacklist()
+
     def dump_brom(self, filename, btype):
+        if btype == "gcpu" and self.chipconfig.gcpu_base is None:
+            self.error("Chipconfig has no gcpu_base field for this cpu")
+            return False
+        elif btype == "cqdma" and self.chipconfig.cqdma_base is None or self.chipconfig.ap_dma_mem is None:
+            self.error("Chipconfig has no cqdma_base and/or ap_dma_mem field for this cpu")
+            return False
+        if self.chipconfig.blacklist:
+            self.disable_range_blacklist(btype)
         self.info("Dump bootrom")
         print_progress(0, 100, prefix='Progress:', suffix='Complete', bar_length=50)
         old = 0
@@ -150,10 +234,18 @@ class PLTools(metaclass=LogBase):
                     print_progress(prog, 100, prefix='Progress:', suffix='Complete, addr %08X' % addr,
                                    bar_length=50)
                     old = round(prog, 1)
+                if btype == "gcpu":
+                    wf.write(self.gcpu.aes_read_cbc(addr))
+                elif btype == "cqdma":
+                    if not self.chipconfig.blacklist:
+                        wf.write(self.cqdma.mem_read(addr, 16, True))
+                    else:
+                        wf.write(self.cqdma.mem_read(addr, 16, False))
         print_progress(100, 100, prefix='Progress:', suffix='Complete', bar_length=50)
         return True
 
     def payload(self, payload, daaddr, ptype):
+        self.disable_range_blacklist(ptype)
         try:
             while len(payload) % 4 != 0:
                 payload += b"\x00"
@@ -173,3 +265,36 @@ class PLTools(metaclass=LogBase):
         except Exception as e:
             self.error("Failed to load payload file. Error: " + str(e))
             return False
+
+    def aes_hwcrypt(self, data, iv=None, encrypt=True, mode="cbc", btype="sej"):
+        if btype == "sej":
+            self.disable_range_blacklist(btype)
+            if encrypt:
+                if mode == "cbc":
+                    return self.sej.hw_aes128_cbc_encrypt(buf=data, encrypt=True)
+            else:
+                if mode == "cbc":
+                    return self.sej.hw_aes128_cbc_encrypt(buf=data, encrypt=False)
+        elif btype == "gcpu":
+            self.disable_range_blacklist(btype)
+            addr = self.chipconfig.da_payload_addr
+            if mode == "ebc":
+                return self.gcpu.aes_read_ebc(data=data, encrypt=encrypt)
+            if mode == "cbc":
+                if self.gcpu.aes_setup_cbc(addr=addr, data=data, iv=iv, encrypt=encrypt):
+                    return self.gcpu.aes_read_cbc(addr=addr, encrypt=encrypt)
+        elif btype == "cqdma":
+            self.disable_range_blacklist(btype)
+        elif btype == "dxcc":
+            if self.chipconfig.cqdma_base is not None:
+                self.disable_range_blacklist("cqdma")
+            elif self.chipconfig.gcpu_base is not None:
+                self.disable_range_blacklist("gcpu")
+            if mode == "fde":
+                return self.dxcc.generate_fde()
+            elif mode == "rpmb":
+                return self.dxcc.generate_rpmb()
+        else:
+            self.error("Unknown aes_hwcrypt type: " + btype)
+            self.error("aes_hwcrypt supported types are: sej")
+            return bytearray()

@@ -1,3 +1,6 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# (c) B.Kerler 2018-2021 MIT License
 import logging
 import os
 from struct import pack, unpack
@@ -16,7 +19,7 @@ class Kamakiri(metaclass=LogBase):
         self.error = self.__logger.error
         self.warning = self.__logger.warning
         if loglevel == logging.DEBUG:
-            logfilename = "log.txt"
+            logfilename = os.path.join("logs", "log.txt")
             if os.path.exists(logfilename):
                 os.remove(logfilename)
             fh = logging.FileHandler(logfilename)

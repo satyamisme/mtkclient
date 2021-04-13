@@ -1,3 +1,6 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# (c) B.Kerler 2018-2021 MIT License
 import os
 import sys
 import logging
@@ -37,7 +40,7 @@ class Port(metaclass=LogBase):
         self.usbreadwrite = self.cdc.usbreadwrite
 
         if loglevel == logging.DEBUG:
-            logfilename = "log.txt"
+            logfilename = os.path.join("logs", "log.txt")
             if os.path.exists(logfilename):
                 os.remove(logfilename)
             fh = logging.FileHandler(logfilename)
@@ -81,7 +84,7 @@ class Port(metaclass=LogBase):
                 self.cdc.connected = self.cdc.connect()
                 if self.cdc.connected:
                     # self.cdc.setLineCoding(19200)
-                    # self.cdc.setControlLineState(RTS=True,DTR=True)
+                    # self.cdc.setcontrollinestate(RTS=True,DTR=True)
                     # self.cdc.setbreak()
                     tries = 100
                     i = 0

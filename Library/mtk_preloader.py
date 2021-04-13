@@ -1,3 +1,6 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# (c) B.Kerler 2018-2021 MIT License
 import os
 import logging
 from Library.utils import LogBase
@@ -110,7 +113,7 @@ class Preloader(metaclass=LogBase):
         self.sendcmd = self.mtk.port.mtk_cmd
 
         if loglevel == logging.DEBUG:
-            logfilename = "log.txt"
+            logfilename = os.path.join("logs", "log.txt")
             if os.path.exists(logfilename):
                 os.remove(logfilename)
             fh = logging.FileHandler(logfilename)
@@ -192,11 +195,17 @@ class Preloader(metaclass=LogBase):
         if self.display:
             self.info("HW code:\t\t\t" + hex(self.config.hwcode))
         meid = self.get_meid()
+        if len(meid) >= 16:
+            with open(os.path.join("logs", "meid"), "wb") as wf:
+                wf.write(hexlify(meid))
         if self.display:
             if meid != b"":
                 self.info("ME_ID:\t\t\t" + hexlify(meid).decode('utf-8').upper())
         if readsocid:
             socid = self.get_socid()
+            if len(socid) >= 16:
+                with open(os.path.join("logs", "socid"), "wb") as wf:
+                    wf.write(hexlify(socid))
             if self.display:
                 if socid != b"":
                     self.info("SOC_ID:\t\t\t" + hexlify(socid).decode('utf-8').upper())

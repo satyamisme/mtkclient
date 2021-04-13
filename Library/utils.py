@@ -1,3 +1,6 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# (c) B.Kerler 2018-2021 MIT License
 import sys
 import logging
 import logging.config
@@ -9,6 +12,16 @@ import stat
 import colorama
 import copy
 from struct import pack, unpack
+
+try:
+    from capstone import *
+except ImportError as e:
+    print(f"Capstone library missing: {str(e)}")
+
+try:
+    from keystone import *
+except ImportError as e:
+    print(f"Keystone library missing: {str(e)}")
 
 
 def hex2bytes(value):
@@ -129,6 +142,145 @@ def uart_valid_sc(sc):
             print(codecs.encode(sc, 'hex'))
             return False
     return True
+
+
+def disasm(code, size):
+    cs = Cs(CS_ARCH_ARM64, CS_MODE_LITTLE_ENDIAN)
+    instr = []
+    for i in cs.disasm(code, size):
+        # print("0x%x:\t%s\t%s" % (i.address, i.mnemonic, i.op_str))
+        instr.append("%s\t%s" % (i.mnemonic, i.op_str))
+    return instr
+
+
+class PatchTools:
+    cstyle = False
+    bDebug = False
+
+    def __init__(self, bdebug=False):
+        self.bDebug = bdebug
+
+    def has_bad_uart_chars(self, data):
+        badchars = [b'\x00', b'\n', b'\r', b'\x08', b'\x7f', b'\x20', b'\x09']
+        for idx, c in enumerate(data):
+            c = bytes([c])
+            if c in badchars:
+                return True
+        return False
+
+    def generate_offset(self, offset):
+        div = 0
+        found = False
+        while not found and div < 0x606:
+            data = struct.pack("<I", offset + div)
+            data2 = struct.pack("<H", div)
+            badchars = self.has_bad_uart_chars(data)
+            if not badchars:
+                badchars = self.has_bad_uart_chars(data2)
+                if not badchars:
+                    return div
+            div += 4
+
+        # if div is not found within positive offset, try negative offset
+        div = 0
+        while not found and div < 0x606:
+            data = struct.pack("<I", offset - div)
+            data2 = struct.pack("<H", div)
+            badchars = self.has_bad_uart_chars(data)
+            if not badchars:
+                badchars = self.has_bad_uart_chars(data2)
+                if not badchars:
+                    return -div
+            div += 4
+        return 0
+
+    # Usage: offset, "X24"
+    def generate_offset_asm(self, offset, reg):
+        div = self.generate_offset(offset)
+        abase = ((offset + div) & 0xFFFF0000) >> 16
+        a = ((offset + div) & 0xFFFF)
+        strasm = ""
+        if div > 0:
+            strasm += "# " + hex(offset) + "\n"
+            strasm += "mov " + reg + ", #" + hex(a) + ";\n"
+            strasm += "movk " + reg + ", #" + hex(abase) + ", LSL#16;\n"
+            strasm += "sub  " + reg + ", " + reg + ", #" + hex(div) + ";\n"
+        else:
+            strasm += "# " + hex(offset) + "\n"
+            strasm += "mov " + reg + ", #" + hex(a) + ";\n"
+            strasm += "movk " + reg + ", #" + hex(abase) + ", LSL#16;\n"
+            strasm += "add  " + reg + ", " + reg + ", #" + hex(-div) + ";\n"
+        return strasm
+
+    def assembler(self, code):
+        ks = Ks(KS_ARCH_ARM64, KS_MODE_LITTLE_ENDIAN)
+        if self.bDebug:
+            try:
+                encoding, count = ks.asm(code)
+            except KsError as kerr:
+                print(kerr)
+                print(kerr.stat_count)
+                print(code[kerr.stat_count:kerr.stat_count + 10])
+                exit(0)
+                if self.bDebug:
+                    # walk every line to find the (first) error
+                    for idx, line in enumerate(code.splitlines()):
+                        print("%02d: %s" % (idx, line))
+                        if len(line) and line[0] != '.':
+                            try:
+                                encoding, count = ks.asm(line)
+                            except Exception as kerr:
+                                print("bummer: " + str(kerr))
+                else:
+                    exit(0)
+        else:
+            encoding, count = ks.asm(code)
+
+        sc = ""
+        count = 0
+        out = ""
+        for i in encoding:
+            if self.cstyle:
+                out += ("\\x%02x" % i)
+            else:
+                out += ("%02x" % i)
+            sc += "%02x" % i
+
+            count += 1
+            # if bDebug and count % 4 == 0:
+            #    out += ("\n")
+
+        return out
+
+    def find_binary(self, data, strf, pos=0):
+        t = strf.split(b".")
+        pre = 0
+        offsets = []
+        while pre != -1:
+            pre = data[pos:].find(t[0], pre)
+            if pre == -1:
+                if len(offsets) > 0:
+                    for offset in offsets:
+                        error = 0
+                        rt = offset + len(t[0])
+                        for i in range(1, len(t)):
+                            if t[i] == b'':
+                                rt += 1
+                                continue
+                            rt += 1
+                            prep = data[rt:].find(t[i])
+                            if prep != 0:
+                                error = 1
+                                break
+                            rt += len(t[i])
+                        if error == 0:
+                            return offset
+                else:
+                    return None
+            else:
+                offsets.append(pre)
+                pre += 1
+        return None
 
 
 def read_object(data: object, definition: object) -> object:

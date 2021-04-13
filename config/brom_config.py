@@ -134,7 +134,7 @@ hwconfig = {
         # watchdog
         # uart
         # brom_payload_addr
-        da_payload_addr=0x200000,
+        da_payload_addr=0x201000,
         # gcpu_base
         # sej_base
         # no dxcc
@@ -148,7 +148,7 @@ hwconfig = {
                        watchdog=0xA0030000,
                        uart=0xA0080000,
                        brom_payload_addr=0x100A00,
-                       da_payload_addr=0x200000,
+                       da_payload_addr=0x201000,
                        # no gcpu_base
                        # no sej_base
                        # no dxcc
@@ -162,7 +162,7 @@ hwconfig = {
         watchdog=0x10007000,
         uart=0x11002000,
         brom_payload_addr=0x100A00,  # todo: check
-        da_payload_addr=0x200000,
+        da_payload_addr=0x201000,
         gcpu_base=0x1020D000,
         sej_base=0x1000A000,
         # no dxcc
@@ -174,7 +174,7 @@ hwconfig = {
     0x6516: chipconfig(  # var1
         watchdog=0x10003000,
         uart=0x10023000,
-        da_payload_addr=0x200000,  # todo: check
+        da_payload_addr=0x201000,  # todo: check
         # gcpu_base
         sej_base=0x1002D000,
         # no dxcc
@@ -256,7 +256,7 @@ hwconfig = {
         watchdog=0x10007000,
         uart=0x11005000,
         brom_payload_addr=0x100A00,
-        da_payload_addr=0x200000,
+        da_payload_addr=0x201000,
         # no gcpu_base
         sej_base=0x1000A000,
         # dxcc_base
@@ -270,7 +270,7 @@ hwconfig = {
                        watchdog=0x10007000,
                        uart=0x11002000,
                        brom_payload_addr=0x100A00,
-                       da_payload_addr=0x200000,
+                       da_payload_addr=0x201000,
                        pl_payload_addr=0x80001000,
                        gcpu_base=0x1101B000,
                        sej_base=0x1000A000,
@@ -299,7 +299,7 @@ hwconfig = {
         watchdog=0x10000000,  # fixme
         uart=0x11006000,
         brom_payload_addr=0x100A00,
-        da_payload_addr=0x200000,
+        da_payload_addr=0x201000,
         gcpu_base=0x10210000,
         sej_base=0x1000A000,
         # no dxcc
@@ -340,7 +340,7 @@ hwconfig = {
                       watchdog=0x10212000,
                       uart=0x11002000,
                       brom_payload_addr=0x100A00,
-                      da_payload_addr=0x200000,
+                      da_payload_addr=0x201000,
                       pl_payload_addr=0x40200000,
                       gcpu_base=0x10216000,  # mt6735, 6737, 6753, 6735m
                       sej_base=0x10008000,
@@ -355,7 +355,7 @@ hwconfig = {
                       watchdog=0x10212000,
                       uart=0x11002000,
                       brom_payload_addr=0x100A00,
-                      da_payload_addr=0x200000,
+                      da_payload_addr=0x201000,
                       pl_payload_addr=0x40200000,
                       gcpu_base=0x10216000,  # mt6735, 6737, 6753, 6735m
                       sej_base=0x10008000,
@@ -371,7 +371,7 @@ hwconfig = {
                       watchdog=0x10007000,
                       uart=0x11002000,
                       brom_payload_addr=0x100A00,
-                      da_payload_addr=0x200000,
+                      da_payload_addr=0x201000,
                       pl_payload_addr=0x40200000,
                       gcpu_base=0x10050000,
                       sej_base=0x1000A000,  # hacc
@@ -401,7 +401,7 @@ hwconfig = {
         watchdog=0x10212000,
         uart=0x11002000,
         brom_payload_addr=0x100A00,
-        da_payload_addr=0x200000,
+        da_payload_addr=0x201000,
         pl_payload_addr=0x40200000,
         gcpu_base=0x10216000,
         sej_base=0x10008000,
@@ -429,7 +429,7 @@ hwconfig = {
         watchdog=0x10211000,
         uart=0x11020000,
         brom_payload_addr=0x100A00,  # todo:check
-        da_payload_addr=0x200000,  # todo:check
+        da_payload_addr=0x201000,  # todo:check
         gcpu_base=0x10224000,
         sej_base=0x1000A000,
         cqdma_base=0x10212c00,
@@ -455,7 +455,7 @@ hwconfig = {
                       watchdog=0x10007000,
                       uart=0x11002000,
                       brom_payload_addr=0x100A00,
-                      da_payload_addr=0x200000,
+                      da_payload_addr=0x201000,
                       gcpu_base=0x10210000,
                       sej_base=0x1000A000,  # hacc
                       cqdma_base=0x10212C00,
@@ -468,7 +468,7 @@ hwconfig = {
                       watchdog=0x10007000,
                       uart=0x11002000,
                       brom_payload_addr=0x100A00,
-                      da_payload_addr=0x200000,
+                      da_payload_addr=0x201000,
                       pl_payload_addr=0x40200000,
                       gcpu_base=0x10210000,
                       sej_base=0x1000A000,  # hacc
@@ -483,7 +483,7 @@ hwconfig = {
                       watchdog=0x10007000,
                       uart=0x11002000,
                       brom_payload_addr=0x100A00,
-                      da_payload_addr=0x200000,
+                      da_payload_addr=0x201000,
                       gcpu_base=0x10210000,
                       sej_base=0x1000A000,
                       cqdma_base=0x10212C00,
@@ -497,7 +497,7 @@ hwconfig = {
         watchdog=0x10210000,
         uart=0x11020000,
         brom_payload_addr=0x100A00,  # todo
-        da_payload_addr=0x200000,
+        da_payload_addr=0x201000,
         gcpu_base=0x10050000,
         sej_base=0x10080000,  # hacc
         # no dxcc
@@ -512,7 +512,7 @@ hwconfig = {
         watchdog=0x10210000,
         uart=0x11020000,
         brom_payload_addr=0x100A00,  # todo
-        da_payload_addr=0x200000,
+        da_payload_addr=0x201000,
         gcpu_base=0x10210000,
         # sej_base
         # cqdma_base
@@ -525,7 +525,7 @@ hwconfig = {
                       watchdog=0x10007000,
                       uart=0x11002000,
                       brom_payload_addr=0x100A00,
-                      da_payload_addr=0x200000,
+                      da_payload_addr=0x201000,
                       gcpu_base=0x10050000,
                       sej_base=0x1000A000,  # hacc
                       dxcc_base=0x10210000,
@@ -540,7 +540,7 @@ hwconfig = {
                       watchdog=0x10007000,
                       uart=0x11002000,
                       brom_payload_addr=0x100A00,
-                      da_payload_addr=0x200000,
+                      da_payload_addr=0x201000,
                       gcpu_base=0x10050000,
                       dxcc_base=0x10210000,
                       sej_base=0x1000A000,  # hacc
@@ -555,7 +555,7 @@ hwconfig = {
                       watchdog=0x10007000,
                       uart=0x11002000,
                       brom_payload_addr=0x100A00,
-                      da_payload_addr=0x200000,
+                      da_payload_addr=0x201000,
                       pl_payload_addr=0x40200000,
                       gcpu_base=0x10050000, # not confirmed
                       sej_base=0x1000a000,  # hacc
@@ -571,7 +571,7 @@ hwconfig = {
                       watchdog=0x10007000,
                       uart=0x11002000,
                       brom_payload_addr=0x100A00,
-                      da_payload_addr=0x200000,
+                      da_payload_addr=0x201000,
                       gcpu_base=0x10050000,
                       sej_base=0x1000A000,  # hacc
                       dxcc_base=0x10210000,
@@ -586,7 +586,7 @@ hwconfig = {
                       watchdog=0x10007000,
                       uart=0x11002000,
                       brom_payload_addr=0x100A00,
-                      da_payload_addr=0x200000,
+                      da_payload_addr=0x201000,
                       gcpu_base=0x10050000,
                       sej_base=0x1000A000,  # hacc
                       dxcc_base=0x10210000,  # dxcc_sec
@@ -612,7 +612,7 @@ hwconfig = {
         watchdog=0x10007000,
         uart=0x11002000,
         brom_payload_addr=0x100A00,
-        da_payload_addr=0x200000,
+        da_payload_addr=0x201000,
         gcpu_base=0x10050000,
         sej_base=0x1000a000,  # hacc
         dxcc_base=0x10210000,
@@ -627,7 +627,7 @@ hwconfig = {
         watchdog=0x10007000,
         uart=0x11002000,
         brom_payload_addr=0x100A00,
-        da_payload_addr=0x200000,
+        da_payload_addr=0x201000,
         gcpu_base=0x10050000,
         sej_base=0x1000A000,  # hacc
         dxcc_base=0x10210000,
@@ -658,7 +658,7 @@ hwconfig = {
                       watchdog=0x10007000,
                       uart=0x11002000,
                       brom_payload_addr=0x100A00,
-                      da_payload_addr=0x200000,
+                      da_payload_addr=0x201000,
                       gcpu_base=0x10210000,
                       # no dxcc
                       sej_base=0x1000A000,  # hacc
@@ -672,7 +672,7 @@ hwconfig = {
                       watchdog=0x10211000,
                       uart=0x11020000,
                       brom_payload_addr=0x100A00,
-                      da_payload_addr=0x200000,
+                      da_payload_addr=0x201000,
                       gcpu_base=0x10210000,
                       cqdma_base=0x11B30000,
                       ap_dma_mem=0x11000000 + 0x1A0,  # AP_DMA_I2C_2_RX_MEM_ADDR
@@ -686,7 +686,7 @@ hwconfig = {
         # watchdog
         # uart
         # brom_payload_addr
-        da_payload_addr=0x200000,
+        da_payload_addr=0x201000,
         # gcpu_base
         # sej_base
         # cqdma_base
@@ -699,7 +699,7 @@ hwconfig = {
         watchdog=0x10007000,
         uart=0x11002000,
         brom_payload_addr=0x100A00,
-        da_payload_addr=0x200000,
+        da_payload_addr=0x201000,
         gcpu_base=0x10050000,
         dxcc_base=0x10210000,
         cqdma_base=0x10212000,
@@ -713,7 +713,7 @@ hwconfig = {
                       watchdog=0x10007000,
                       uart=0x11002000,
                       brom_payload_addr=0x100A00,
-                      da_payload_addr=0x200000,
+                      da_payload_addr=0x201000,
                       gcpu_base=0x10050000,
                       dxcc_base=0x10210000,
                       sej_base=0x1000a000,  # hacc
@@ -742,7 +742,7 @@ hwconfig = {
         watchdog=0x10007000,
         uart=0x11002000,
         brom_payload_addr=0x100A00,
-        da_payload_addr=0x200000,
+        da_payload_addr=0x201000,
         gcpu_base=0x10050000,
         dxcc_base=0x10210000,
         sej_base=0x1000a000,  # hacc
@@ -756,7 +756,7 @@ hwconfig = {
         # watchdog
         # uart
         # brom_payload_addr
-        da_payload_addr=0x200000,  # todo
+        da_payload_addr=0x201000,  # todo
         # gcpu_base
         # sej_base
         # cqdma_base
@@ -769,7 +769,7 @@ hwconfig = {
         watchdog=0x10007000,
         uart=0x11002000,
         brom_payload_addr=0x100A00,
-        da_payload_addr=0x200000,
+        da_payload_addr=0x201000,
         gcpu_base=0x1101B000,
         sej_base=0x1000A000,
         # cqdma_base
@@ -808,7 +808,7 @@ hwconfig = {
                        watchdog=0x10007000,
                        uart=0x11002000,
                        brom_payload_addr=0x100A00,
-                       da_payload_addr=0x200000,
+                       da_payload_addr=0x201000,
                        gcpu_base=0x11010000,
                        sej_base=0x1000A000,
                        # no cqdma_base
@@ -834,7 +834,7 @@ hwconfig = {
                        watchdog=0x10007000,
                        uart=0x11002000,
                        brom_payload_addr=0x100A00,
-                       da_payload_addr=0x200000,
+                       da_payload_addr=0x201000,
                        gcpu_base=0x10210000,
                        sej_base=0x1000A000,
                        # no dxcc
@@ -848,7 +848,7 @@ hwconfig = {
         watchdog=0x10007000,
         uart=0x11005000,
         brom_payload_addr=0x100A00,
-        da_payload_addr=0x200000,
+        da_payload_addr=0x201000,
         gcpu_base=0x1020D000,
         sej_base=0x1000A000,
         # no dxcc
@@ -862,7 +862,7 @@ hwconfig = {
         watchdog=0x10007000,
         uart=0x11002000,
         brom_payload_addr=0x100A00,
-        da_payload_addr=0x200000,  # todo
+        da_payload_addr=0x201000,  # todo
         # gcpu_base
         # sej_base
         # cqdma_base
@@ -901,7 +901,7 @@ hwconfig = {
         # watchdog
         # uart
         # brom_payload_addr
-        da_payload_addr=0x200000,
+        da_payload_addr=0x201000,
         # gcpu_base
         # sej_base
         # cqdma_base
@@ -927,7 +927,7 @@ hwconfig = {
         # watchdog
         # uart
         # brom_payload_addr
-        da_payload_addr=0x200000,
+        da_payload_addr=0x201000,
         # gcpu_base
         # sej_base
         # cqdma_base
@@ -940,7 +940,7 @@ hwconfig = {
         # watchdog
         # uart
         # brom_payload_addr
-        da_payload_addr=0x200000,
+        da_payload_addr=0x201000,
         # gcpu_base
         # sej_base
         # cqdma_base
@@ -953,7 +953,7 @@ hwconfig = {
                        watchdog=0x10007000,
                        uart=0x11002000,
                        brom_payload_addr=0x100A00,
-                       da_payload_addr=0x200000,
+                       da_payload_addr=0x201000,
                        pl_payload_addr=0x40001000,
                        # gcpu_base
                        # sej_base
@@ -967,7 +967,7 @@ hwconfig = {
         # watchdog
         # uart
         # brom_payload_addr
-        da_payload_addr=0x200000,
+        da_payload_addr=0x201000,
         # gcpu_base
         # sej_base
         # cqdma_base
